@@ -3,6 +3,10 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Load and display an image in the sidebar
+logo_path = 'logo.png' 
+st.sidebar.image(logo_path, use_column_width=True)
+
 def load_data():
     data = pd.read_csv('wage_rates_by_education.csv')
     return data
@@ -48,3 +52,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Add a footer
+footer_html = """
+<div style='text-align: center;'>
+    <p style='margin: 20px 0;'>
+        Made with ❤️ by Param, Yash S, Yash P & Vraj
+    </p>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

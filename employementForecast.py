@@ -3,6 +3,10 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 
+# Load and display an image in the sidebar
+logo_path = 'logo.png' 
+st.sidebar.image(logo_path, use_column_width=True)
+
 # Function to load data
 def load_data(file_name):
     data = pd.read_csv(f'content/{file_name}')
@@ -59,3 +63,14 @@ elif plot_type == "Area Chart":
         st.plotly_chart(fig)
     else:
         st.warning('No numeric data to plot.')
+
+
+# Add a footer
+footer_html = """
+<div style='text-align: center;'>
+    <p style='margin: 20px 0;'>
+        Made with ❤️ by Param, Yash S, Yash P & Vraj
+    </p>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

@@ -1,113 +1,135 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-from sklearn.cluster import KMeans
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+import plotly.graph_objs as go
+import plotly.express as px
 
-# Load and display an image in the sidebar
-logo_path = 'logo.png' 
-st.sidebar.image(logo_path, use_column_width=True)
 
-# Function to load and preprocess data
+# Load the dataset
 @st.cache_data
 def load_data():
-    df = pd.read_csv('education_level_region.csv')
-    df = df.melt(id_vars=['Geography', 'Educational attainment level'], var_name='Year', value_name='Percentage')
-    df['Year'] = df['Year'].astype(int)  # Convert 'Year' to integer
-    return df
+    return pd.read_csv('education_level_region.csv')
 
 df = load_data()
 
-# App title
-st.title("Education Level Data by Region in Canada")
-
-# Sidebar for filtering
-st.sidebar.header("Filter Data")
-all_geography = st.sidebar.checkbox("Select All Regions", True)
-if all_geography:
-    selected_geography = df['Geography'].unique().tolist()
-else:
-    selected_geography = st.sidebar.multiselect("Select Regions", options=df['Geography'].unique())
-
-filtered_data = df[df['Geography'].isin(selected_geography)]
-
-# Checkbox for displaying raw data
-if st.checkbox('Show raw data'):
-    st.write(filtered_data)
+st.title("Education Level Data by Region in Canada") 
 
 
-# Trend analysis with slider
-year_to_filter = st.slider('Select a year to filter the data', min_value=df['Year'].min(), max_value=df['Year'].max(), value=df['Year'].min())
-filtered_year_data = filtered_data[filtered_data['Year'] == year_to_filter]
-st.subheader(f"Trend Analysis for the year {year_to_filter}")
-fig = px.bar(filtered_year_data, x='Geography', y='Percentage', color='Educational attainment level')
-st.plotly_chart(fig)
+# Display the dataframe
+st.write("Education Level Data by Region:", df.head())
 
+# Basic statistics
+st.subheader("Descriptive Statistics")
+st.write(df.describe())
 
-# Define year range slider
-year_range = st.slider('Select the year range:', df['Year'].min(), df['Year'].max(), (df['Year'].min(), df['Year'].max()))
-# Filter data based on the selected year range
-year_filtered_data = df[df['Year'].between(year_range[0], year_range[1])]
+# Define a function to plot matplotlib graphs
+def plot_state_data(state):
+    state_data = df[df['Geography'] == state]
+    below_secondary_mean = state_data[state_data['Educational attainment level'] == 'Below upper secondary 7'].iloc[:, 2:].mean(numeric_only=True)
+    post_secondary_mean = state_data[state_data['Educational attainment level'] == 'Upper secondary and post-secondary non-tertiary'].iloc[:, 2:].mean(numeric_only=True)
+    tertiary_mean = state_data[state_data['Educational attainment level'] == 'Tertiary education'].iloc[:, 2:].mean(numeric_only=True)
 
-# Education Level Trends Over Time
-st.subheader("Education Level Trends Over Time")
-education_levels = year_filtered_data['Educational attainment level'].unique()
-for level in education_levels:
-    level_data = year_filtered_data[year_filtered_data['Educational attainment level'] == level]
-    fig = px.line(level_data, x='Year', y='Percentage', color='Geography', title=f'Trend for {level}')
+    plt.figure(figsize=(10, 6))
+    plt.plot(below_secondary_mean.index, below_secondary_mean.values, label='Below Upper Secondary 7')
+    plt.plot(post_secondary_mean.index, post_secondary_mean.values, label='Upper Secondary and Post-Secondary Non-Tertiary')
+    plt.plot(tertiary_mean.index, tertiary_mean.values, label='Tertiary Education')
+    plt.title(f"Educational Attainment in {state}")
+    plt.xlabel("Year")
+    plt.ylabel("Mean Percentage")
+    plt.grid(True)
+    plt.legend()
+    st.pyplot(plt)
+
+# Plotting with Matplotlib
+if st.checkbox("Show Matplotlib Graphs"):
+    st.subheader("Matplotlib Visualizations")
+    for state in df['Geography'].unique():
+        plot_state_data(state)
+
+# Run this function for Plotly interactive graphs
+def interactiveGraphs(state):
+    state_data = df[df['Geography'] == state]
+    categories = ['Below upper secondary 7', 'Upper secondary and post-secondary non-tertiary', 'Tertiary education']
+    years = df.columns[2:].tolist()  # Assuming year columns start from 3rd column
+
+    data = {year: [state_data[state_data['Educational attainment level'] == category][year].values[0] if not state_data[state_data['Educational attainment level'] == category][year].empty else None for category in categories] for year in years}
+    traces = []
+    for year in years:
+        if all(data[year]):
+            trace = go.Scatter(x=categories, y=data[year], mode='lines+markers', name=year,
+                               hovertemplate='<b>%{x}</b><br>%{y:.2f}%<extra></extra>')
+            traces.append(trace)
+
+    layout = go.Layout(
+        title=f'Educational Attainment in {state}',
+        xaxis=dict(title='Education Categories'),
+        yaxis=dict(title='Percentage'),
+        legend=dict(orientation='h', x=0.1, y=-0.2)
+    )
+    fig = go.Figure(data=traces, layout=layout)
+    fig.update_layout(
+        hovermode='closest',
+        template='plotly_dark',  # Dark theme
+        showlegend=True,
+        legend=dict(title='Year', orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+    )
     st.plotly_chart(fig)
 
-# Heatmap of Education Levels Across Regions and Years
-st.subheader("Heatmap of Education Levels Across Regions and Years")
-for level in education_levels:
-    level_data = year_filtered_data[year_filtered_data['Educational attainment level'] == level]
-    heatmap_data = level_data.pivot(index='Geography', columns='Year', values='Percentage')  # Corrected pivot usage
-    st.write(f"Heatmap for {level}")
-    fig, ax = plt.subplots()
-    sns.heatmap(heatmap_data, annot=True, cmap='viridis', ax=ax)
-    st.pyplot(fig)
-
-# K-Means Clustering
-if st.checkbox('Perform K-Means Clustering'):
-    if not filtered_data.empty:
-        st.subheader("K-Means Clustering")
-        num_clusters = st.slider('Select Number of Clusters', 2, 10, 3)
-        clustering_data = filtered_data[['Percentage']].dropna()
-        if clustering_data.shape[0] > 1:  # Ensure there's enough data
-            kmeans = KMeans(n_clusters=num_clusters)
-            clusters = kmeans.fit_predict(clustering_data)
-            filtered_data['Cluster'] = clusters
-
-            # Enhance cluster visualization
-            fig = px.scatter(filtered_data, x='Year', y='Percentage', color='Cluster', size='Percentage', title="K-Means Clustering Results", hover_data=['Educational attainment level'])
-            fig.update_traces(marker=dict(size=12, line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
-            st.plotly_chart(fig)
-        else:
-            st.warning('Not enough data to perform clustering.')
-    else:
-        st.warning('No data available for clustering. Please adjust the filters.')
+# Interactive graphs with Plotly
+st.subheader("Interactive Plotly Visualizations")
+state = st.selectbox("Select a State for Detailed View:", df['Geography'].unique())
+interactiveGraphs(state)
 
 # Correlation Matrix
-if st.checkbox('Show Correlation Matrix'):
-    st.subheader("Correlation Matrix")
-    numeric_data = filtered_data.select_dtypes(include=[np.number])  # Select only numerical columns for correlation
-    corr_matrix = numeric_data.corr()
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
-    st.pyplot(plt)
-    st.balloons()
+st.subheader("Correlation Matrix")
+correlation_matrix = df.corr(numeric_only=True)
+st.write(correlation_matrix)
+fig, ax = plt.subplots()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+st.pyplot(fig)
 
 
+############################################################################################################
 
-# Add a footer
-footer_html = """
-<div style='text-align: center;'>
-    <p style='margin: 20px 0;'>
-        Made with ❤️ by Param, Yash S, Yash P & Vraj
-    </p>
-</div>
-"""
-st.markdown(footer_html, unsafe_allow_html=True)
+# Clustering of States based on Education Statistics
+st.subheader("Clustering of States based on Education Statistics")
 
+# Pivot the data to have states as rows and years as columns
+pivot_data = df.pivot(index='Geography', columns='Educational attainment level')
+
+# Drop multi-level index for simplicity
+pivot_data.columns = ['_'.join(col).strip() for col in pivot_data.columns.values]
+
+# Select only the columns containing years (2018, 2019, etc.)
+year_columns = [col for col in pivot_data.columns if col.split('_')[0].isdigit()]
+
+# Select data for clustering
+X = pivot_data[year_columns]
+
+# Normalize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Choose the number of clusters (you may need to experiment)
+num_clusters = 3
+
+# Apply K-means clustering
+kmeans = KMeans(n_clusters=num_clusters, n_init=10, random_state=42)
+cluster_labels = kmeans.fit_predict(X_scaled)
+
+# Add cluster labels to the original data
+pivot_data['Cluster'] = cluster_labels
+
+# Visualize the clusters with state labels
+fig = px.scatter(x=X_scaled[:, 0], y=X_scaled[:, 1], color=cluster_labels, hover_name=pivot_data.index)
+fig.update_layout(
+    title='Clustering of States based on Education Statistics',
+    xaxis_title='Principal Component 1',
+    yaxis_title='Principal Component 2',
+    showlegend=True,
+    legend_title='Cluster'
+)
+st.plotly_chart(fig)

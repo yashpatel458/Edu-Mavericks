@@ -9,6 +9,7 @@ import plotly.express as px
 
 
 # Load the dataset
+
 @st.cache_data
 def load_data():
     return pd.read_csv('education_level_region.csv')

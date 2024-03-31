@@ -1,6 +1,22 @@
 from flask import Flask, render_template, redirect, url_for
 import subprocess
+from pymongo import MongoClient
 
+completeData = []
+def readData():
+    # Connect to MongoDB
+    client = MongoClient('mongodb://127.0.0.1:27017/')
+    db = client['AdtProject']
+    collection = db['education']
+
+    # Get all data from the collection
+    data = collection.find()
+
+    # Iterate over the data and print each document
+    for document in data:
+        completeData.append(document)
+
+readData()
 app = Flask(__name__)
 
 @app.route('/')

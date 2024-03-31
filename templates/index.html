@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edu-Marvericks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Edu-Marvericks</h1>
+    </header>
+    <nav>
+        <a href="{{ url_for('link1') }}" target="_blank" onclick="closeCurrentTab()">education</a>
+        <a href="{{ url_for('link2') }}" target="_blank" onclick="closeCurrentTab()">wagesByEducation</a>
+        <a href="{{ url_for('link3') }}" target="_blank" onclick="closeCurrentTab()">employementByForecast</a>
+    </nav>
+    <div class="content">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Your Image">
+    </div>
+    <script>
+        function closeCurrentTab() {
+            window.close();
+        }
+    </script>
+</body>
+</html>

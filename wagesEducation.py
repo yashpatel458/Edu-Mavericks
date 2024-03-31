@@ -15,7 +15,6 @@ st.sidebar.image(logo_path, use_column_width=True)
 # Add Table of Contents in the sidebar
 st.sidebar.header('Table of Contents')
 st.sidebar.markdown("""
-  - [Raw data](#raw-data)
   - [Column names](#column-names)
   - [Sum of wages by education level](#sum-of-wages-by-education-level)
   - [Mean wages by education level](#mean-wages-by-education-level)

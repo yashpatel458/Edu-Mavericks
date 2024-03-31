@@ -1,9 +1,5 @@
 
 import streamlit as st
-
-# Set the title of the app
-st.title('Ontario Employment Data Analysis')
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,14 +8,46 @@ import scipy.stats as stats
 import plotly.graph_objects as go
 import statsmodels.api as sm
 import plotly.express as px
-
+import folium
+from streamlit_folium import st_folium
 from datetime import datetime
+
+# Load and display an image in the sidebar
+logo_path = 'logo.png' 
+st.sidebar.image(logo_path, use_column_width=True)
+
+# Set the title of the app
+st.title('Insights into Ontario\'s Employment Landscape')
+
+# Add Table of Contents in the sidebar
+st.sidebar.header('Table of Contents')
+st.sidebar.markdown("""
+- [Data Overview](#data-overview)
+- [Employment in Ontario](#employment-in-ontario)
+- [Time Series Analysis](#time-series-analysis)
+- [Long Term Forecast](#long-term-forecast)
+- [Industry Employment Analysis](#industry-employment-analysis)
+- [Employment Trend Analysis by Industry](#employment-trend-analysis-by-industry)
+- [Occupational Category Employment Changes](#occupational-category-employment-changes)
+- [Unemployment Rate Analysis](#unemployment-rate-analysis)
+- [Wage Rate and CPI Analysis](#wage-rate-and-cpi-analysis)
+""")
 
 df1 = pd.read_csv("content/labour-market-report-chart-1-Emplyment in Ontario june 23.csv")
 df2 = pd.read_csv("content/labour-market-report-chart-2-Industries with highest and lowest emp change jun 23.csv")
 df3 = pd.read_csv("content/labour-market-report-chart-3-employment change in ontario june 23.csv")
 df5 = pd.read_csv("content/labour-market-report-chart-5-unemployment rates.csv")
 df8 = pd.read_csv("content/labour-market-report-chart-8- change in wage rate and CPI june 23.csv")
+
+
+
+# center on Liberty Bell, add marker
+m = folium.Map(location=[51.2538, -85.3232], zoom_start=5)
+
+
+# call to render Folium map in Streamlit
+st_data = st_folium(m, height=325, width=725)
+
 
 st.subheader('Data Overview')
 st.write('Employment in Ontario June 23 Dataset:')
@@ -33,9 +61,9 @@ st.dataframe(df5.head())
 st.write('Change in Wage Rate and CPI Dataset:')
 st.dataframe(df8.head())
 
-## Employment in Ontario 
+## Employment in Ontario
 
-st.subheader('Ontario Employment Data')
+st.markdown("<h3 id='employment-in-ontario'>Employment in Ontario</h3>", unsafe_allow_html=True)
 df1.info()
 st.write(df1.describe())
 
@@ -177,8 +205,15 @@ plt.legend()
 plt.tight_layout()
 st.pyplot(plt)
 
-# Display the forecasted values until 2025
-st.write('Forecasted Values until 2025:')
+"""
+The employment trend in Ontario, as depicted by the 'Actual Data' line, shows a significant decrease in employment around 2020, but it has since recovered and continued to grow. The forecast suggests that this growth in employment is expected to continue steadily into the future, with no significant downturns or upswings predicted. The stable 'Forecast' line indicates a positive outlook for the Ontario job market, assuming the models used for forecasting remain accurate and no unforeseen events disrupt the job market.
+
+While the 'Forecast' line suggests a smooth upward trend in employment, a more cautious approach would consider the possibility of ongoing or new challenges that could disrupt this trend. Economic recovery from events like the pandemic is often uneven and can be subject to setbacks from factors like renewed public health crises, supply chain issues, inflation, or shifts in global markets. Therefore, without including comprehensive current affairs in the forecasting model, there is a risk that this optimistic outlook may not accurately reflect future realities, and the actual employment trajectory could be more volatile than projected.
+"""
+
+
+# Display the forecasted values until 2028
+st.write('Forecasted Values until 2028:')
 st.dataframe(filtered_predictions)
 
 
@@ -350,7 +385,15 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 """
-The average hourly wage rate in Ontario for employees was \$34.02 in June, above the average rate across Canada (\$33.12). Ontario’s average hourly wage rate in June rose by 3.7% on a year-over-year basis (by \$1.22 from \$32.80 in June 2022 and was below the 5.1% increase in May.
-
-June’s wage growth (3.7%) was above the growth seen in the Ontario Consumer Price Index (CPI) as of May (3.1%). The CPI is a measure of inflation that represents changes in prices for goods and services as experienced by consumers.
+The graph demonstrates periods where wage changes do not align with CPI inflation trends. Notably, around 2020, the CPI inflation rate peaks sharply, likely outpacing wage growth. This discrepancy could indicate a period where the purchasing power of wages decreased due to inflation rising faster than wages. The mismatch between wage growth and inflation can lead to reduced real income for individuals, making it harder for consumers to maintain their standard of living. The instability in the CPI line after 2020, with continued fluctuations, could suggest ongoing economic challenges or recovery efforts. The data implies that wages have not consistently kept pace with inflation, a situation that can contribute to broader economic stress for the working population.
 """
+
+# Add a footer
+footer_html = """
+<div style='text-align: center;'>
+    <p style='margin: 20px 0;'>
+        Made with ❤️ by Param, Yash S, Yash P & Vraj
+    </p>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

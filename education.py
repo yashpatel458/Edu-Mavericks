@@ -15,11 +15,26 @@ def load_data():
 
 df = load_data()
 
-st.title("Education Level Data by Region in Canada") 
+# Load and display an image in the sidebar
+logo_path = 'logo.png' 
+st.sidebar.image(logo_path, use_column_width=True)
+
+# Add Table of Contents in the sidebar
+st.sidebar.header('Table of Contents')
+st.sidebar.markdown("""
+- [Descriptive Statistics](#descriptive-statistics)
+- [Matplotlib Visualizations](#matplotlib-visualizations)
+- [Interactive Plotly Visualizations](#interactive-plotly-visualizations)
+- [Correlation Matrix](#correlation-matrix)
+- [Clustering of States based on Education Statistics](#clustering-of-states-based-on-education-statistics)
+""")
+
+
+st.title("Exploring Education Levels Across Canadian Regions") 
 
 
 # Display the dataframe
-st.write("Education Level Data by Region:", df.head())
+st.write("Education Level Data from 2019-2022:", df.head())
 
 # Basic statistics
 st.subheader("Descriptive Statistics")
@@ -83,6 +98,10 @@ st.subheader("Interactive Plotly Visualizations")
 state = st.selectbox("Select a State for Detailed View:", df['Geography'].unique())
 interactiveGraphs(state)
 
+"""
+The overarching conclusion is that Canada's education levels are comparable to OECD averages, with strong upper secondary and post-secondary non-tertiary attainment. However, there are regional disparities, especially in tertiary education, that could be influenced by local factors. This suggests a need for targeted educational policies to address regional discrepancies and to maintain or improve educational standards nationwide.
+"""
+
 # Correlation Matrix
 st.subheader("Correlation Matrix")
 correlation_matrix = df.corr(numeric_only=True)
@@ -91,6 +110,9 @@ fig, ax = plt.subplots()
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
 st.pyplot(fig)
 
+"""
+The heatmap indicates a very high level of consistency or a strong positive correlation in the data from year to year between 2018 and 2022, with 2022 being slightly less correlated to 2018. This suggests that whatever is being measured has remained relatively stable over time, with only minor variations in 2022. The precise nature of the data being correlated is not provided, but based on the high correlation coefficients, one could infer that the factors or variables being measured have exhibited similar behavior or trends throughout these years.
+"""
 
 ############################################################################################################
 
@@ -123,8 +145,15 @@ cluster_labels = kmeans.fit_predict(X_scaled)
 # Add cluster labels to the original data
 pivot_data['Cluster'] = cluster_labels
 
+# Define colors for each cluster
+cluster_colors = {0: 'darkblue', 1: 'green', 2: 'red'}  # Adjust colors as needed
+
+# Define marker sizes for each cluster
+cluster_sizes = {0: 15, 1: 12, 2: 12}  # Adjust sizes as needed
+
 # Visualize the clusters with state labels
-fig = px.scatter(x=X_scaled[:, 0], y=X_scaled[:, 1], color=cluster_labels, hover_name=pivot_data.index)
+fig = px.scatter(x=X_scaled[:, 0], y=X_scaled[:, 1], color=cluster_labels, hover_name=pivot_data.index, color_discrete_map=cluster_colors)
+fig.update_traces(marker=dict(size=[cluster_sizes[label] for label in cluster_labels]))  # Update marker sizes
 fig.update_layout(
     title='Clustering of States based on Education Statistics',
     xaxis_title='Principal Component 1',
@@ -132,4 +161,22 @@ fig.update_layout(
     showlegend=True,
     legend_title='Cluster'
 )
+
+# Update hover template for clarity
+fig.update_traces(hovertemplate='<b>%{hovertext}</b><br>Cluster: %{marker.color}')
+
 st.plotly_chart(fig)
+
+"""
+The PCA scatterplot suggests that most Canadian provinces and territories have education statistics that are fairly similar to each other and close to the OECD average, with Ontario being somewhat distinct but not an outlier. Saskatchewan and the Northwest Territories differ more from the central cluster but to a lesser extent than Nunavut, which is markedly different from all other points on the plot. These differences could be due to various factors such as demographic variations, policy differences, or disparities in educational outcomes. Nunavut's distinct positioning implies that its education system may face unique challenges or circumstances compared to the rest of Canada and the OECD countries.
+"""
+
+# Add a footer
+footer_html = """
+<div style='text-align: center;'>
+    <p style='margin: 20px 0;'>
+        Made with ❤️ by Param, Yash S, Yash P & Vraj
+    </p>
+</div>
+"""
+st.markdown(footer_html, unsafe_allow_html=True)

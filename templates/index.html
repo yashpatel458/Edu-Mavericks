@@ -1,52 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Edu-Marvericks</title>
+    <title>EduMavericks</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f0f0f0;
+            background-color: #000000;
         }
         header {
-            background-color: #333;
-            color: white;
-            padding: 10px;
+            background-color: #068e85;
+            color: rgb(255, 255, 255);
+            padding: 30px;
             text-align: center;
+            font-size: 23px;
         }
         nav {
-            background-color: #444;
-            padding: 10px;
+            background-color: #00363c;
+            padding: 20px;
             text-align: center;
+            font-weight: 600;
+            text-decoration: underline;
+            font-size: larger;
         }
         nav a {
-            color: white;
+            margin: 0 20px 0 20px;
+            color: #c2f9ff;
             text-decoration: none;
-            margin: 0 10px;
         }
         .content {
             text-align: center;
             padding: 20px;
+            background-color: #000000;
+
         }
         img {
             max-width: 100%;
             height: auto;
         }
+        footer {
+            background-color: #000000;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Edu-Marvericks</h1>
+        <h1>Forecasting Employment Growth: A Comprehensive Analysis of Skill Gaps, Gender Disparities, and Educational Barriers</h1>
     </header>
     <nav>
-        <a href="{{ url_for('link1') }}" target="_blank" onclick="closeCurrentTab()">education</a>
-        <a href="{{ url_for('link2') }}" target="_blank" onclick="closeCurrentTab()">wagesByEducation</a>
-        <a href="{{ url_for('link3') }}" target="_blank" onclick="closeCurrentTab()">employementByForecast</a>
+        <a href="{{ url_for('link1') }}" target="_blank">Education across Regions</a>
+        <a href="{{ url_for('link2') }}" target="_blank">Wages by Education</a>
+        <a href="{{ url_for('link3') }}" target="_blank">Employment Landscape</a>
     </nav>
     <div class="content">
         <img src="{{ url_for('static', filename='logo.png') }}" alt="Your Image">
     </div>
+    <footer>
+        <p>&copy;2024 Winter Semester Advanced Database Topics, all rights reserved.</p>
+    </footer>
     <script>
         function closeCurrentTab() {
             window.close();

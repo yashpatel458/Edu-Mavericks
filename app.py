@@ -10,6 +10,7 @@ def index():
 @app.route('/donoothing')
 def donoothing():
     return render_template('close.html')
+
 @app.route('/link1')
 def link1():
     subprocess.Popen(['streamlit', 'run', 'education.py'])
